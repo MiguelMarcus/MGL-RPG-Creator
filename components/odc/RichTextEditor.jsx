@@ -12,6 +12,12 @@ function ToolButton({ label, active = false, children, onClick }) {
   return <button type="button" className={`rich-tool${active ? " is-active" : ""}`} title={label} aria-label={label} aria-pressed={active} onMouseDown={event => event.preventDefault()} onClick={onClick}>{children}</button>;
 }
 
+function applyToCursorBlock(editor, action) {
+  if (!editor) return;
+  const cursor = editor.state.selection.head;
+  action(editor.chain().focus().setTextSelection(cursor)).run();
+}
+
 function RichToolbar({ editor, onLink }) {
   const state = useEditorState({
     editor,
@@ -34,12 +40,12 @@ function RichToolbar({ editor, onLink }) {
   });
   return <div className="rich-toolbar" role="toolbar" aria-label="Formatação da descrição">
     <div className="rich-tool-group" aria-label="Blocos">
-      <ToolButton label="Título" active={state.heading2} onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}>H₂</ToolButton>
-      <ToolButton label="Subtítulo" active={state.heading3} onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}>H₃</ToolButton>
-      <ToolButton label="Lista com marcadores" active={state.bulletList} onClick={() => editor?.chain().focus().toggleBulletList().run()}>☷</ToolButton>
-      <ToolButton label="Lista numerada" active={state.orderedList} onClick={() => editor?.chain().focus().toggleOrderedList().run()}>1.</ToolButton>
-      <ToolButton label="Citação" active={state.quote} onClick={() => editor?.chain().focus().toggleBlockquote().run()}>❝</ToolButton>
-      <ToolButton label="Linha horizontal" onClick={() => editor?.chain().focus().setHorizontalRule().run()}>―</ToolButton>
+      <ToolButton label="Título do parágrafo atual" active={state.heading2} onClick={() => applyToCursorBlock(editor, chain => chain.toggleHeading({ level: 2 }))}>H₂</ToolButton>
+      <ToolButton label="Subtítulo do parágrafo atual" active={state.heading3} onClick={() => applyToCursorBlock(editor, chain => chain.toggleHeading({ level: 3 }))}>H₃</ToolButton>
+      <ToolButton label="Lista a partir do parágrafo atual" active={state.bulletList} onClick={() => applyToCursorBlock(editor, chain => chain.toggleBulletList())}>☷</ToolButton>
+      <ToolButton label="Lista numerada a partir do parágrafo atual" active={state.orderedList} onClick={() => applyToCursorBlock(editor, chain => chain.toggleOrderedList())}>1.</ToolButton>
+      <ToolButton label="Citação do parágrafo atual" active={state.quote} onClick={() => applyToCursorBlock(editor, chain => chain.toggleBlockquote())}>❝</ToolButton>
+      <ToolButton label="Inserir linha no parágrafo atual" onClick={() => applyToCursorBlock(editor, chain => chain.setHorizontalRule())}>―</ToolButton>
     </div>
     <span className="rich-separator" aria-hidden="true" />
     <div className="rich-tool-group" aria-label="Texto">
