@@ -16,6 +16,7 @@
     "@tiptap/extension-superscript": "^3.31.4",
     "@tiptap/react": "^3.31.4",
     "@tiptap/starter-kit": "^3.31.4",
+    "html-to-image": "^1.11.13",
     "next": "^15.5.27",
     "postcss": "^8.5.29",
     "react": "19.1.1",

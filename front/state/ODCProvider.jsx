@@ -89,13 +89,14 @@ export default function ODCProvider({ children }) {
       setSelected(entry.id);
       setSaved(true);
       notify("Criação salva na sua biblioteca");
+      router.push("/visualizar");
     } catch (error) {
       const quota = error?.name === "QuotaExceededError" || error?.name === "NS_ERROR_DOM_QUOTA_REACHED";
       notify(quota ? "O espaço deste navegador acabou. Exporte e remova imagens ou variantes que não usa." : error?.message || "Não foi possível salvar. Suas alterações continuam abertas.");
     } finally {
       setSaving(false);
     }
-  }, [entry, notify]);
+  }, [entry, notify, router]);
 
   const discard = useCallback(() => {
     const original = entries.find(item => item.id === selected);
