@@ -1,5 +1,6 @@
 import Field from "./Field";
 import RichTextEditor from "./RichTextEditor";
+import ImageAssetsEditor from "./ImageAssetsEditor";
 
 const habitats = ["Planícies", "Colinas", "Montanhas", "Pântanos", "Geleiras", "Desertos", "Florestas", "Subterrâneos", "Oceanos", "Extra planar"];
 
@@ -16,13 +17,7 @@ export default function EntryEditor({ entry, onChange }) {
         <Field label="Nome" help="Como sua criação é chamada."><input autoFocus placeholder="Ex.: Brugo ou Bufante" value={entry.name} onChange={e => update("name", e.target.value)} /></Field>
         {(isRace || isClass || isSpell) && <Field label="ID para importação" help="ID estável; reutilize para atualizar o item no Foundry."><input value={entry.importId || entry.id} onChange={e => update("importId", e.target.value)} /></Field>}
         <Field label="Subtítulo" help="Uma frase curta que apresenta a ideia." className="span-two"><input placeholder="Uma frase que desperta curiosidade…" value={entry.subtitle} onChange={e => update("subtitle", e.target.value)} /></Field>
-        <Field label="Imagem" help="WEBP, JPEG ou PNG • até 5 MB" className="span-three image-field">
-          <div className="image-upload">
-            {entry.image ? <img src={entry.image} alt="Prévia da criação" /> : <span className="image-placeholder">✧</span>}
-            <div><strong>{entry.image ? "Imagem adicionada" : "Adicione uma imagem"}</strong><small>Uma imagem dá vida à sua criação.</small><label className="upload-button">Escolher arquivo<input type="file" accept="image/png,image/jpeg,image/webp" onChange={e => { const f = e.target.files?.[0]; if (f && f.size <= 5 * 1024 * 1024) { const reader = new FileReader(); reader.onload = () => update("image", reader.result); reader.readAsDataURL(f); } }} /></label></div>
-            {entry.image && <button className="text-action" onClick={() => update("image", "")}>Remover imagem</button>}
-          </div>
-        </Field>
+        <div className="span-three"><ImageAssetsEditor entry={entry} onChange={onChange} isMonster={isMonster} /></div>
       </div>
     </section>
     <section className="editor-section">
