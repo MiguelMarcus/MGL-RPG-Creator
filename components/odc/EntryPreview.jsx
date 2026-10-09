@@ -1,4 +1,4 @@
-import { categories, richTextHTML } from "../../lib/odc.mjs";
+import { categories, descriptionFontFamily, richTextHTML } from "../../lib/odc.mjs";
 
 const textSections = entry => entry.type === "racas"
   ? [["Descrição", entry.description], ["Personalidade", entry.combat], ["Aventuras", entry.finalDescription]]
@@ -9,6 +9,7 @@ const textSections = entry => entry.type === "racas"
 export default function EntryPreview({ entry }) {
   const isMonster = entry.type === "monstros";
   const category = categories.find(item => item.id === entry.type)?.label || "Criação";
+  const descriptionFont = descriptionFontFamily(entry.descriptionFont);
   const gameData = entry.type === "racas" ? [["MOVIMENTO", entry.movement && `${entry.movement} m`], ["INFRAVISÃO", entry.infravision && `${entry.infravision} m`], ["ALINHAMENTO", entry.alignment]]
     : entry.type === "classes" ? [["TIPO", entry.classKind === "especializacao" ? "Especialização" : entry.classKind === "classe" ? "Classe base" : ""], ["CLASSE BASE", entry.baseClass], ["PV NO 1º NÍVEL", entry.classHitDie], ["PV APÓS O 10º", entry.highLevelHpBonus], ["ATRIBUTO PRINCIPAL", entry.primeAttribute], ["REQUISITOS", entry.requirements], ["ARMAS", entry.weaponRestrictions], ["ARMADURAS", entry.armorRestrictions], ["ITENS MÁGICOS", entry.magicItemRestrictions]]
       : entry.type === "equipamentos" ? [["TIPO", entry.equipmentType], ["PREÇO", entry.price], ["PESO", entry.weight], ["DANO / PROTEÇÃO", entry.damage], ["PROPRIEDADES", entry.properties]]
@@ -27,7 +28,7 @@ export default function EntryPreview({ entry }) {
     {entry.type === "classes" && levelRows.length > 0 && <section className="sheet-description"><h2>Progressão de níveis</h2><div className="sheet-progression">{levelRows.map((row, index) => <div key={row.id || index}><strong>{row.level || index + 1}</strong><span>XP {row.xp || "—"}</span><span>PV {row.hp || "—"}</span><span>BA {row.ba || "—"}</span><span>JP {row.jp || "—"}</span></div>)}</div></section>}
     {(entry.type === "racas" || entry.type === "classes") && abilities.filter(ability => ability.name || ability.description).map((ability, index) => <section className="sheet-description" key={ability.id || index}><h2>{ability.name || "Habilidade"}{entry.type === "classes" && ability.level ? ` · Nível ${ability.level}` : ""}</h2>{ability.description && <div className="rich-preview" dangerouslySetInnerHTML={{ __html: richTextHTML(ability.description) }} />}</section>)}
     {entry.type === "classes" && (entry.classSpells || []).filter(spell => spell.name || spell.description).map((spell, index) => <section className="sheet-description" key={spell.id || index}><h2>{spell.name || "Magia"}</h2><p>{[spell.school, spell.spellLevel && `Círculo ${spell.spellLevel}`, spell.range, spell.duration].filter(Boolean).join(" · ")}</p>{spell.description && <div className="rich-preview" dangerouslySetInnerHTML={{ __html: richTextHTML(spell.description) }} />}</section>)}
-    {textSections(entry).filter(([, value]) => String(value || "").trim()).map(([title, value]) => <section className="sheet-description rich-preview" key={title}><h2>{title}</h2><div dangerouslySetInnerHTML={{ __html: richTextHTML(value) }} /></section>)}
+    {textSections(entry).filter(([, value]) => String(value || "").trim()).map(([title, value]) => <section className="sheet-description rich-preview" style={{ fontFamily: descriptionFont }} key={title}><h2>{title}</h2><div dangerouslySetInnerHTML={{ __html: richTextHTML(value) }} /></section>)}
     <div className="sheet-foot"><span>ODC <i>✧</i> OFICINA DE CRIAÇÃO</span><span>OLD DRAGON 2ª EDIÇÃO</span></div>
   </article>;
 }

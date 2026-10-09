@@ -6,7 +6,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Superscript from "@tiptap/extension-superscript";
 import Subscript from "@tiptap/extension-subscript";
-import { richTextHTML } from "../../lib/odc.mjs";
+import { descriptionFonts, richTextHTML } from "../../lib/odc.mjs";
 
 function ToolButton({ label, active = false, children, onClick }) {
   return <button type="button" className={`rich-tool${active ? " is-active" : ""}`} title={label} aria-label={label} aria-pressed={active} onMouseDown={event => event.preventDefault()} onClick={onClick}>{children}</button>;
@@ -18,7 +18,7 @@ function applyToCursorBlock(editor, action) {
   action(editor.chain().focus().setTextSelection(cursor)).run();
 }
 
-function RichToolbar({ editor, onLink }) {
+function RichToolbar({ editor, onLink, font, onFontChange }) {
   const state = useEditorState({
     editor,
     selector: ({ editor: current }) => ({
@@ -58,11 +58,17 @@ function RichToolbar({ editor, onLink }) {
       <ToolButton label="Sobrescrito" active={state.superscript} onClick={() => editor?.chain().focus().toggleSuperscript().run()}>x²</ToolButton>
       <ToolButton label="Subscrito" active={state.subscript} onClick={() => editor?.chain().focus().toggleSubscript().run()}>x₂</ToolButton>
     </div>
+    <label className="rich-font-picker" title="Aplicar a fonte em todas as descrições">
+      <span>Fonte</span>
+      <select aria-label="Fonte para todas as descrições" value={font || "georgia"} onChange={event => onFontChange?.(event.target.value)}>
+        {descriptionFonts.map(item => <option key={item.id} value={item.id} style={{ fontFamily: item.css }}>{item.name}</option>)}
+      </select>
+    </label>
     <span className="rich-toolbar-count">{state.words} {state.words === 1 ? "palavra" : "palavras"}</span>
   </div>;
 }
 
-export default function RichTextEditor({ value = "", onChange, placeholder = "Escreva sua descrição…", minHeight = "220px" }) {
+export default function RichTextEditor({ value = "", onChange, font = "georgia", fontFamily = "Georgia, serif", onFontChange, placeholder = "Escreva sua descrição…", minHeight = "220px" }) {
   const onChangeRef = useRef(onChange);
   useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
   const extensions = useMemo(() => [
@@ -98,8 +104,8 @@ export default function RichTextEditor({ value = "", onChange, placeholder = "Es
     else editor.chain().focus().extendMarkRange("link").setLink({ href: url.trim() }).run();
   }, [editor]);
 
-  return <div className="rich-editor" style={{ "--rich-editor-min-height": minHeight }}>
-    <RichToolbar editor={editor} onLink={addLink} />
+  return <div className="rich-editor" style={{ "--rich-editor-min-height": minHeight, "--rich-editor-font": fontFamily }}>
+    <RichToolbar editor={editor} onLink={addLink} font={font} onFontChange={onFontChange} />
     <EditorContent editor={editor} />
   </div>;
 }

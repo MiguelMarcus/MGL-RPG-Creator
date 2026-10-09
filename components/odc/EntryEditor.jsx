@@ -1,6 +1,7 @@
 import Field from "./Field";
 import RichTextEditor from "./RichTextEditor";
 import ImageAssetsEditor from "./ImageAssetsEditor";
+import { descriptionFontFamily } from "../../lib/odc.mjs";
 
 const habitats = ["Planícies", "Colinas", "Montanhas", "Pântanos", "Geleiras", "Desertos", "Florestas", "Subterrâneos", "Oceanos", "Extraplanar"];
 const baseClasses = ["Guerreiro", "Clérigo", "Ladrão", "Mago"];
@@ -137,7 +138,7 @@ export default function EntryEditor({ entry, onChange }) {
 
     <section className="editor-section last-section"><div className="section-heading"><div><span className="eyebrow">{isMonster ? "06" : isRace || isClass || isGear || isSpell ? "03" : "02"} / NARRATIVA</span><h2>{isRace ? "Descrição da raça" : isClass ? "Apresentação e restrições" : "Descrição"}</h2><p>Organize o conteúdo em partes para facilitar a leitura.</p></div><span className="section-symbol">❧</span></div>
       {!isRace && !isClass && <div className="description-tip"><span aria-hidden="true">ⓘ</span><p><strong>Dica:</strong> use a barra para formatar títulos, listas, citações, links, negrito e itálico.</p></div>}
-      {descriptionSections.map(([label, help, key]) => <Field key={key} label={label} help={help}><RichTextEditor key={`${entry.id}:${key}`} value={entry[key] || ""} onChange={value => update(key, value)} minHeight="220px" /></Field>)}
+      {descriptionSections.map(([label, help, key]) => <Field key={key} label={label} help={help}><RichTextEditor key={`${entry.id}:${key}`} value={entry[key] || ""} onChange={value => update(key, value)} font={entry.descriptionFont || "georgia"} fontFamily={descriptionFontFamily(entry.descriptionFont)} onFontChange={font => update("descriptionFont", font)} minHeight="220px" /></Field>)}
     </section>
   </div>;
 }
