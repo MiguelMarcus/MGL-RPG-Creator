@@ -1,4 +1,5 @@
 import Field from "./Field";
+import RichTextEditor from "./RichTextEditor";
 
 const habitats = ["Planícies", "Colinas", "Montanhas", "Pântanos", "Geleiras", "Desertos", "Florestas", "Subterrâneos", "Oceanos", "Extra planar"];
 
@@ -66,9 +67,11 @@ export default function EntryEditor({ entry, onChange }) {
       {entry.attacks.length === 0 && <div className="empty-attacks">Nenhum ataque adicionado ainda.</div>}
       {entry.attacks.map((a, i) => <div className="attack-row" key={i}><Field label="Nº de ataques"><input value={a.count} onChange={e => attackUpdate(i, "count", e.target.value)} /></Field><Field label="Tipo de ataque" className="attack-name"><input placeholder="Ex.: Mordida" value={a.name} onChange={e => attackUpdate(i, "name", e.target.value)} /></Field><Field label="BA"><input value={a.bonus} onChange={e => attackUpdate(i, "bonus", e.target.value)} /></Field><Field label="Dano"><input value={a.damage} onChange={e => attackUpdate(i, "damage", e.target.value)} /></Field><Field label="Bônus"><input value={a.extra} onChange={e => attackUpdate(i, "extra", e.target.value)} /></Field><button aria-label="Remover ataque" className="remove-attack" onClick={() => update("attacks", entry.attacks.filter((_, n) => n !== i))}>×</button></div>)}
     </section>}
-    <section className="editor-section last-section"><div className="section-heading"><div><span className="eyebrow">{isMonster ? "05" : "03"} / NARRATIVA</span><h2>Descrição</h2><p>Conte a história por trás dos números.</p></div><span className="section-symbol">❧</span></div>
-      <Field label="Descrição inicial" help="Aparência, origem, comportamento e cultura."><textarea className="long-text" rows={7} placeholder="Descreva os detalhes que tornam esta criação inesquecível…" value={entry.description} onChange={e => update("description", e.target.value)} /></Field>
-      {isMonster && <Field label="Descrição de combate" help="Como ela age quando a aventura vira confronto."><textarea rows={4} placeholder="Táticas, habilidades e comportamento em combate…" value={entry.combat} onChange={e => update("combat", e.target.value)} /></Field>}
+    <section className="editor-section last-section"><div className="section-heading"><div><span className="eyebrow">{isMonster ? "05" : isRace || isClass || isGear || isSpell ? "04" : "03"} / NARRATIVA</span><h2>Descrição</h2><p>Organize o texto em etapas e formate como quiser.</p></div><span className="section-symbol">❧</span></div>
+      <div className="description-tip"><span aria-hidden="true">ⓘ</span><p><strong>Dica:</strong> use a barra para formatar o texto: títulos, listas, citações, links, negrito, itálico e outros estilos.</p></div>
+      <Field label="Descrição (Início)" help="Aparência, origem, comportamento e cultura."><RichTextEditor value={entry.description || ""} onChange={value => update("description", value)} placeholder="Descreva os detalhes que apresentam esta criação…" minHeight="180px" /></Field>
+      <Field label="Descrição (Habilidades de Combate)" help="Táticas, habilidades e comportamento durante um confronto."><RichTextEditor value={entry.combat || ""} onChange={value => update("combat", value)} placeholder="Descreva como ela age quando a aventura vira confronto…" minHeight="150px" /></Field>
+      <Field label="Descrição (Final)" help="Detalhes adicionais, curiosidades ou informações para fechar a descrição."><RichTextEditor value={entry.finalDescription || ""} onChange={value => update("finalDescription", value)} placeholder="Acrescente detalhes finais, ganchos ou curiosidades…" minHeight="150px" /></Field>
     </section>
   </div>;
 }

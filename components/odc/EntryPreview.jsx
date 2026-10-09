@@ -1,3 +1,5 @@
+import { richTextHTML } from "../../lib/odc.mjs";
+
 export default function EntryPreview({ entry }) {
   const gameData = entry.type === "racas" ? [["TRAÇOS", entry.raceTraits], ["HABILIDADES", entry.raceAbilities], ["IDIOMAS", entry.languages]]
     : entry.type === "classes" ? [["DADO DE VIDA", entry.classHitDie], ["ATRIBUTO PRINCIPAL", entry.primeAttribute], ["REQUISITOS", entry.requirements], ["PROGRESSÃO", entry.progression]]
@@ -9,8 +11,7 @@ export default function EntryPreview({ entry }) {
     {isMonster ? <><div className="sheet-meta"><div><small>ENCONTRO</small><strong>{entry.hd || "—"}d6</strong></div><div><small>EXPERIÊNCIA</small><strong>{entry.xp || "—"} XP</strong></div><div><small>TESOURO</small><strong>{entry.treasure || "—"}</strong></div><div><small>MOVIMENTO</small><strong>{entry.movement || "—"}</strong></div></div>
     <div className="sheet-stats"><div><small>DV [PV]</small><strong>{entry.hd || "—"} <span>[{entry.hp || "—"}]</span></strong></div><div><small>CA</small><strong>{entry.ac || "—"}</strong></div><div><small>JP</small><strong>{entry.jp || "—"}</strong></div><div><small>MO</small><strong>{entry.morale || "—"}</strong></div></div>
     {entry.attacks?.length > 0 && <div className="sheet-attacks">{entry.attacks.map((a, i) => <p key={i}><span>◆</span> {a.count} × <strong>{a.name || "Ataque"} {a.bonus}</strong> <i>({a.damage}{a.extra && ` ${a.extra}`})</i></p>)}</div>}</> : <div className="sheet-meta game-data">{(gameData || []).filter(([, value]) => value).map(([label, value]) => <div key={label}><small>{label}</small><strong>{value}</strong></div>)}{entry.xp > 0 && <div><small>EXPERIÊNCIA</small><strong>{entry.xp} XP</strong></div>}</div>}
-    {entry.description && <section className="sheet-description"><h2>Descrição inicial</h2>{entry.description.split("\n").filter(Boolean).map((p, i) => <p key={i}>{p}</p>)}</section>}
-    {entry.combat && <section className="sheet-description"><h2>De combate</h2>{entry.combat.split("\n").filter(Boolean).map((p, i) => <p key={i}>{p}</p>)}</section>}
+    {[["Descrição (Início)", entry.description], ["Descrição (Habilidades de Combate)", entry.combat], ["Descrição (Final)", entry.finalDescription]].filter(([, value]) => String(value || "").trim()).map(([title, value]) => <section className="sheet-description rich-preview" key={title}><h2>{title}</h2><div dangerouslySetInnerHTML={{ __html: richTextHTML(value) }} /></section>)}
     <div className="sheet-foot"><span>ODC <i>✧</i> OFICINA DE CRIAÇÃO</span><span>OLD DRAGON 2ª EDIÇÃO</span></div>
   </article>;
 }
