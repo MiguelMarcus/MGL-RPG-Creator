@@ -20,13 +20,6 @@ Página: https://miguelmarcus.github.io/MGL-RPG-Creator/
 - `lib/odc.mjs`: categorias, exemplo inicial e adaptação para JSON.
 - `.github/workflows/deploy-pages.yml`: publicação estática no GitHub Pages.
 
-## Executar
-
-```bash
-npm ci
-npm run dev
-```
-
 As criações ficam no armazenamento local do navegador. O PDF é gerado pelo comando de impressão do navegador. O JSON é exportado como arquivo para importação no Foundry.
 
 Para evitar duplicatas ao reimportar raças, classes ou magias, mantenha o mesmo ID de importação. Monstros e equipamentos são exportados no formato ODC; o importador informado aceita raças, classes e magias.
