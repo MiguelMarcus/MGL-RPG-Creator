@@ -11,6 +11,11 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.3",
+    "@tiptap/extension-placeholder": "^3.31.4",
+    "@tiptap/extension-subscript": "^3.31.4",
+    "@tiptap/extension-superscript": "^3.31.4",
+    "@tiptap/react": "^3.31.4",
+    "@tiptap/starter-kit": "^3.31.4",
     "next": "^15.5.27",
     "postcss": "^8.5.29",
     "react": "19.1.1",
