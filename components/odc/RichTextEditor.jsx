@@ -22,8 +22,7 @@ function RichToolbar({ editor, onLink }) {
   const state = useEditorState({
     editor,
     selector: ({ editor: current }) => ({
-      heading2: current?.isActive("heading", { level: 2 }) || false,
-      heading3: current?.isActive("heading", { level: 3 }) || false,
+      paragraph: current?.isActive("paragraph") || false,
       bulletList: current?.isActive("bulletList") || false,
       orderedList: current?.isActive("orderedList") || false,
       quote: current?.isActive("blockquote") || false,
@@ -40,8 +39,9 @@ function RichToolbar({ editor, onLink }) {
   });
   return <div className="rich-toolbar" role="toolbar" aria-label="Formatação da descrição">
     <div className="rich-tool-group" aria-label="Blocos">
-      <ToolButton label="Título do parágrafo atual" active={state.heading2} onClick={() => applyToCursorBlock(editor, chain => chain.toggleHeading({ level: 2 }))}>H₂</ToolButton>
-      <ToolButton label="Subtítulo do parágrafo atual" active={state.heading3} onClick={() => applyToCursorBlock(editor, chain => chain.toggleHeading({ level: 3 }))}>H₃</ToolButton>
+      <ToolButton label="Texto normal no parágrafo atual" active={state.paragraph} onClick={() => applyToCursorBlock(editor, chain => chain.setParagraph())}>¶</ToolButton>
+      <ToolButton label="Título no parágrafo atual" onClick={() => applyToCursorBlock(editor, chain => chain.setHeading({ level: 2 }))}>H₂</ToolButton>
+      <ToolButton label="Subtítulo no parágrafo atual" onClick={() => applyToCursorBlock(editor, chain => chain.setHeading({ level: 3 }))}>H₃</ToolButton>
       <ToolButton label="Lista a partir do parágrafo atual" active={state.bulletList} onClick={() => applyToCursorBlock(editor, chain => chain.toggleBulletList())}>☷</ToolButton>
       <ToolButton label="Lista numerada a partir do parágrafo atual" active={state.orderedList} onClick={() => applyToCursorBlock(editor, chain => chain.toggleOrderedList())}>1.</ToolButton>
       <ToolButton label="Citação do parágrafo atual" active={state.quote} onClick={() => applyToCursorBlock(editor, chain => chain.toggleBlockquote())}>❝</ToolButton>
@@ -74,12 +74,15 @@ export default function RichTextEditor({ value = "", onChange, placeholder = "Es
   const editor = useEditor({
     extensions,
     content: richTextHTML(value) || "<p></p>",
+    editable: true,
     immediatelyRender: false,
     editorProps: {
       attributes: {
         class: "rich-content",
         "aria-label": "Descrição",
         "aria-multiline": "true",
+        "tabindex": "0",
+        "spellcheck": "true",
       },
       transformPastedText(text) { return text; },
     },
