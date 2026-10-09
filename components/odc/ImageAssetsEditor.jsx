@@ -11,15 +11,32 @@ function makeId() {
   return globalThis.crypto?.randomUUID?.() || `asset-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function readImage(file) {
+function readAsDataURL(blob) {
   return new Promise((resolve, reject) => {
-    if (!file || !["image/png", "image/jpeg", "image/webp"].includes(file.type)) return reject(new Error("Use uma imagem PNG, JPEG ou WEBP."));
-    if (file.size > MAX_IMAGE_SIZE) return reject(new Error("A imagem deve ter até 5 MB."));
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
     reader.onerror = () => reject(new Error("Não foi possível ler a imagem."));
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(blob);
   });
+}
+
+async function readImage(file) {
+  if (!file || !["image/png", "image/jpeg", "image/webp"].includes(file.type)) throw new Error("Use uma imagem PNG, JPEG ou WEBP.");
+  if (file.size > MAX_IMAGE_SIZE) throw new Error("A imagem deve ter até 5 MB.");
+  if (typeof createImageBitmap !== "function") return readAsDataURL(file);
+
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, 1800 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close?.();
+    const compressed = await new Promise(resolve => canvas.toBlob(resolve, "image/webp", 0.84));
+    if (compressed && compressed.size < file.size) return readAsDataURL(compressed);
+  } catch {}
+  return readAsDataURL(file);
 }
 
 function saveImage(data, fileName) {
