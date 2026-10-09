@@ -8,11 +8,11 @@ export default function Sidebar({ active, setActive, entries }) {
   const router = useRouter();
   const selectCategory = category => {
     setActive(category);
-    router.push("/");
+    router.push(category === "todos" ? "/" : `/?categoria=${encodeURIComponent(category)}`);
   };
 
   return <aside className="sidebar">
-    <Link href="/" className="brand"><span className="brand-mark">O</span><span>ODC<small>OFICINA DE CRIAÇÃO</small></span></Link>
+    <Link href="/" className="brand" onClick={() => setActive("todos")}><span className="brand-mark">O</span><span>ODC<small>OFICINA DE CRIAÇÃO</small></span></Link>
     <button className="new-button" onClick={() => router.push("/criar")}><span aria-hidden="true">＋</span> Nova criação</button>
     <div className="nav-caption">BIBLIOTECA</div>
     <nav aria-label="Categorias da biblioteca">
