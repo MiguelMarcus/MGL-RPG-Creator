@@ -1,7 +1,7 @@
 import Field from "./Field";
 import RichTextEditor from "./RichTextEditor";
 import ImageAssetsEditor from "./ImageAssetsEditor";
-import { descriptionFontFamily } from "../../../back/odc.mjs";
+import { descriptionFontFamily, monsterHitPoints } from "../../../back/odc.mjs";
 
 const habitats = ["Planícies", "Colinas", "Montanhas", "Pântanos", "Geleiras", "Desertos", "Florestas", "Subterrâneos", "Oceanos", "Extraplanar"];
 const baseClasses = ["Guerreiro", "Clérigo", "Ladrão", "Mago"];
@@ -32,8 +32,8 @@ export default function EntryEditor({ entry, onChange }) {
   const levelProgression = (rows, field) => rows.map(row => row[field] || "").join(",");
   const updateLevels = rows => onChange({ ...entry, classLevels: rows,
     baProgression: levelProgression(rows, "ba"), jpProgression: levelProgression(rows, "jp"), xpProgression: levelProgression(rows, "xp") });
-  const calculatedHp = /^\d+(?:[.,]\d+)?$/.test(String(entry.hd || "").trim())
-    ? Math.max(0, Number(String(entry.hd).replace(",", ".")) * 5 + (Number(entry.hpBonus) || 0)) : null;
+  const calculatedHp = monsterHitPoints(entry);
+  const hasCalculatedHp = /^\d+(?:[.,]\d+)?$/.test(String(entry.hd || "").trim());
 
   const descriptionSections = isRace
     ? [["Descrição", "Apresente o mote da raça, suas características e relação com o cenário.", "description"], ["Personalidade", "Descreva valores, costumes e como eles influenciam um personagem.", "combat"], ["Aventuras", "Conte como membros desta raça se tornam aventureiros e inclua perguntas de interpretação.", "finalDescription"]]
@@ -116,7 +116,7 @@ export default function EntryEditor({ entry, onChange }) {
         <div className="form-grid three-grid">
           <Field label="Dados de Vida (DV)"><input value={entry.hd || ""} onChange={event => update("hd", event.target.value)} /></Field>
           <Field label="Bônus nos Dados de Vida"><input value={entry.hpBonus || ""} onChange={event => update("hpBonus", event.target.value)} /></Field>
-          <Field label="Pontos de Vida (PV)" help={calculatedHp !== null ? "Calculado automaticamente: DV × 5 + bônus." : "Informe o valor quando o DV não for numérico."}><input value={calculatedHp ?? entry.hp ?? ""} readOnly={calculatedHp !== null} onChange={event => update("hp", event.target.value)} /></Field>
+          <Field label="Pontos de Vida (PV)" help={hasCalculatedHp ? "Calculado automaticamente: DV × 5 + bônus." : "Informe o valor quando o DV não for numérico."}><input value={calculatedHp} readOnly={hasCalculatedHp} onChange={event => update("hp", event.target.value)} /></Field>
           <Field label="Classe de Armadura (CA)"><input value={entry.ac || ""} onChange={event => update("ac", event.target.value)} /></Field>
           <Field label="Jogada de Proteção (JP)"><input value={entry.jp || ""} onChange={event => update("jp", event.target.value)} /></Field>
           <Field label="Moral (MO)"><input value={entry.morale || ""} onChange={event => update("morale", event.target.value)} /></Field>

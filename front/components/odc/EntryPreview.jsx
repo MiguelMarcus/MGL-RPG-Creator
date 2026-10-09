@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { categories, descriptionFontFamily, richTextHTML } from "../../../back/odc.mjs";
+import { categories, descriptionFontFamily, monsterHitPoints, richTextHTML } from "../../../back/odc.mjs";
 
 const textSections = entry => entry.type === "racas"
   ? [["Descrição", entry.description], ["Personalidade", entry.combat], ["Aventuras", entry.finalDescription]]
@@ -16,6 +16,7 @@ export default function EntryPreview({ entry }) {
   const isMonster = entry.type === "monstros";
   const category = categories.find(item => item.id === entry.type)?.label || "Criação";
   const descriptionFont = descriptionFontFamily(entry.descriptionFont);
+  const hitPoints = monsterHitPoints(entry);
   const gameData = entry.type === "racas" ? [["MOVIMENTO", entry.movement && `${entry.movement} m`], ["INFRAVISÃO", entry.infravision && `${entry.infravision} m`], ["ALINHAMENTO", entry.alignment]]
     : entry.type === "classes" ? [["TIPO", entry.classKind === "especializacao" ? "Especialização" : entry.classKind === "classe" ? "Classe base" : ""], ["CLASSE BASE", entry.baseClass], ["PV NO 1º NÍVEL", entry.classHitDie], ["PV APÓS O 10º", entry.highLevelHpBonus], ["ATRIBUTO PRINCIPAL", entry.primeAttribute], ["REQUISITOS", entry.requirements], ["ARMAS", entry.weaponRestrictions], ["ARMADURAS", entry.armorRestrictions], ["ITENS MÁGICOS", entry.magicItemRestrictions]]
       : entry.type === "equipamentos" ? [["TIPO", entry.equipmentType], ["PREÇO", entry.price], ["PESO", entry.weight], ["DANO / PROTEÇÃO", entry.damage], ["PROPRIEDADES", entry.properties]]
@@ -40,7 +41,7 @@ export default function EntryPreview({ entry }) {
   return <article className="sheet-card">
     <div className="sheet-top"><div className="sheet-copy"><div className="sheet-kicker">{category}{isMonster && [entry.concept, entry.size, entry.alignment].some(Boolean) && ` · ${[entry.concept, entry.size, entry.alignment].filter(Boolean).join(" · ")}`}</div><h1>{entry.name || "Nova criação"}<span className="sheet-spark">✧</span></h1>{entry.subtitle && <p className="sheet-subtitle">{entry.subtitle}</p>}</div>{entry.image ? <button ref={imageButtonRef} type="button" className="sheet-image-open" aria-label={`Ampliar imagem de ${entry.name || "criação"}`} onClick={() => setImageOpen(true)}><img className="sheet-image" src={entry.image} alt={entry.name || "Imagem da criação"} /><span>Ampliar imagem</span></button> : <div className="sheet-image-placeholder"><span>✧</span><small>IMAGEM</small></div>}</div>
     {isMonster ? <><div className="sheet-meta"><div><small>ENCONTRO</small><strong>{entry.encounterQuantity || "—"}</strong></div><div><small>ENCONTRO (COVIL)</small><strong>{entry.lairEncounterQuantity || "—"}</strong></div><div><small>TESOURO</small><strong>{entry.treasure && entry.treasure !== "—" ? entry.treasure : "—"}</strong></div><div><small>TESOURO (COVIL)</small><strong>{entry.lairTreasure || "—"}</strong></div></div>
-      <div className="sheet-stats"><div><small>DV [PV]</small><strong>{entry.hd || "—"} <span>[{entry.hp || "—"}]</span></strong></div><div><small>CA</small><strong>{entry.ac || "—"}</strong></div><div><small>JP</small><strong>{entry.jp || "—"}</strong></div><div><small>MO</small><strong>{entry.morale || "—"}</strong></div></div>
+      <div className="sheet-stats"><div><small>DV [PV]</small><strong>{entry.hd || "—"} <span>[{hitPoints === "" ? "—" : hitPoints}]</span></strong></div><div><small>CA</small><strong>{entry.ac || "—"}</strong></div><div><small>JP</small><strong>{entry.jp || "—"}</strong></div><div><small>MO</small><strong>{entry.morale || "—"}</strong></div></div>
       <div className="sheet-extra"><span><small>EXPERIÊNCIA</small><strong>{entry.xp || "—"} XP</strong></span><span><small>MOVIMENTO</small><strong>{entry.movement || "—"} m</strong></span>{movementModes.map(([label, value]) => <span key={label}><small>{label.toUpperCase()}</small><strong>{value} m</strong></span>)}</div>
       {entry.attacks?.length > 0 && <div className="sheet-attacks">{entry.attacks.map((attack, index) => <p key={attack.id || index}><span>◆</span> {attack.count} × <strong>{attack.name} {attack.bonus}</strong> <i>({attack.damage}{attack.extra && ` ${attack.extra}`})</i>{attack.effect && <> · {attack.effect}</>}{attack.weapon && " · Arma"}</p>)}</div>}
     </> : <div className="sheet-meta game-data">{gameData.filter(([, value]) => value !== "" && value !== undefined && value !== null).map(([label, value]) => <div key={label}><small>{label}</small><strong>{value}</strong></div>)}</div>}

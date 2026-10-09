@@ -16,6 +16,17 @@ export const descriptionFonts = [
 
 export const descriptionFontFamily = (id) => descriptionFonts.find(font => font.id === id)?.css || descriptionFonts[0].css;
 
+export function monsterHitPoints(entry) {
+  const hitDice = String(entry.hd || "").trim();
+  if (/^\d+(?:[.,]\d+)?$/.test(hitDice)) {
+    const dice = Number(hitDice.replace(",", "."));
+    const bonus = Number(String(entry.hpBonus || "").replace(",", ".")) || 0;
+    const total = dice * 5 + bonus;
+    if (Number.isFinite(total)) return Math.max(0, total);
+  }
+  return entry.hp || "";
+}
+
 export function blankEntry(type = "monstros") {
   const id = globalThis.crypto?.randomUUID?.() || `odc-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   return {
