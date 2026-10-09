@@ -1,14 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { categories } from "../../../back/odc.mjs";
 
 export default function Sidebar({ active, setActive, entries }) {
   const router = useRouter();
+  const pathname = usePathname();
   const selectCategory = category => {
     setActive(category);
-    router.push(category === "todos" ? "/" : `/?categoria=${encodeURIComponent(category)}`);
+    if (pathname !== "/") router.push("/");
   };
 
   return <aside className="sidebar">
