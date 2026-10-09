@@ -28,7 +28,16 @@ export default function ODCProvider({ children }) {
   useEffect(() => {
     let mounted = true;
     loadEntries().then(list => {
-      if (mounted) setEntries(list);
+      if (!mounted) return;
+      setEntries(list);
+      const requestedId = new URLSearchParams(window.location.search).get("id");
+      const requestedEntry = list.find(item => item.id === requestedId);
+      if (requestedEntry) {
+        setEntry(requestedEntry);
+        setSelected(requestedEntry.id);
+        setActive(requestedEntry.type);
+        setSaved(true);
+      }
     }).catch(error => {
       if (mounted) setToast(error?.message || "Não foi possível abrir a biblioteca deste navegador.");
     });
@@ -65,7 +74,7 @@ export default function ODCProvider({ children }) {
     setSelected(item.id);
     setActive(type);
     setSaved(false);
-    router.push("/editar");
+    router.push(`/editar?id=${encodeURIComponent(item.id)}`);
   }, [router]);
 
   const openEntry = useCallback((item, destination = "/editar") => {
@@ -73,7 +82,7 @@ export default function ODCProvider({ children }) {
     setEntry(item);
     setActive(item.type);
     setSaved(true);
-    router.push(destination);
+    router.push(`${destination}?id=${encodeURIComponent(item.id)}`);
   }, [router]);
 
   const save = useCallback(async () => {
@@ -89,7 +98,7 @@ export default function ODCProvider({ children }) {
       setSelected(entry.id);
       setSaved(true);
       notify("Criação salva na sua biblioteca");
-      router.push("/visualizar");
+      router.push(`/visualizar?id=${encodeURIComponent(entry.id)}`);
     } catch (error) {
       const quota = error?.name === "QuotaExceededError" || error?.name === "NS_ERROR_DOM_QUOTA_REACHED";
       notify(quota ? "O espaço deste navegador acabou. Exporte e remova imagens ou variantes que não usa." : error?.message || "Não foi possível salvar. Suas alterações continuam abertas.");

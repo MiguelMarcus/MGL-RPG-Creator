@@ -43,7 +43,7 @@ export default function PreviewPage() {
     <div className="page-heading">
       <div><h1>{entry.name || "Nova criação"}</h1><p>Prévia para leitura, compartilhamento ou impressão.</p></div>
       <div className="heading-actions">
-        <button className="outline-button" onClick={() => router.push("/editar")}>Voltar à edição</button>
+        <button className="outline-button" onClick={() => router.push(`/editar?id=${encodeURIComponent(entry.id)}`)}>Voltar à edição</button>
         <button className="outline-button" type="button" onClick={downloadPNG} disabled={exportingPNG}>{exportingPNG ? "Gerando PNG…" : "Salvar como PNG"} <span>↗</span></button>
         <button className="export-button" onClick={() => window.print()}>Salvar como PDF <span>↗</span></button>
       </div>
