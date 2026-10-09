@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import EntryPreview from "../components/odc/EntryPreview";
 import { useODC } from "../state/ODCProvider";
-import { loadEntry } from "../lib/storage.mjs";
+import { loadEntry } from "../lib/storage";
 
 export default function PreviewPage() {
   const router = useRouter();

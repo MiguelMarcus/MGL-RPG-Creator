@@ -6,7 +6,7 @@ import { useODC } from "../state/ODCProvider";
 
 export default function LibraryPage() {
   const router = useRouter();
-  const { entries, active, query, setQuery, openEntry } = useODC();
+  const { entries, active, query, setQuery, openEntry, remove } = useODC();
 
   return <CreationLibrary
     entries={entries}
@@ -16,5 +16,6 @@ export default function LibraryPage() {
     onCreate={() => router.push("/criar")}
     onView={item => openEntry(item, "/visualizar")}
     onEdit={item => openEntry(item)}
+    onDelete={remove}
   />;
 }

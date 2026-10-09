@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-A aplicação utiliza Next.js com runtime Node.js. A rota `POST /api/entries/validate` valida uma criação antes de salvá-la localmente; se a API não estiver disponível, o editor continua funcionando offline com IndexedDB.
+A aplicação utiliza Next.js com runtime Node.js. As rotas `/api/entries` oferecem criação, leitura, atualização e exclusão no servidor. O IndexedDB continua como cache e modo offline; quando a API estiver disponível, as criações locais são sincronizadas.
 
 ## Recursos
 
