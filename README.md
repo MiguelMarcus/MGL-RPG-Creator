@@ -2,7 +2,16 @@
 
 Aplicação modular para criar conteúdo de Old Dragon 2, visualizar fichas e exportar dados.
 
-Página: https://miguelmarcus.github.io/MGL-RPG-Creator/
+> A versão com API requer hospedagem Node.js; GitHub Pages não executa rotas de servidor.
+
+## Execução
+
+```bash
+npm install
+npm run dev
+```
+
+A aplicação utiliza Next.js com runtime Node.js. A rota `POST /api/entries/validate` valida uma criação antes de salvá-la localmente; se a API não estiver disponível, o editor continua funcionando offline com IndexedDB.
 
 ## Recursos
 

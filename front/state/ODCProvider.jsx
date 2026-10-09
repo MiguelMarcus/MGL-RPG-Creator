@@ -7,6 +7,23 @@ import { loadEntries, requestPersistentStorage, saveEntry } from "../lib/storage
 
 const ODCContext = createContext(null);
 
+async function validateEntryWithServer(entry) {
+  try {
+    const response = await fetch("/api/entries/validate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry),
+    });
+    if (response.ok) return;
+    const result = await response.json().catch(() => ({}));
+    throw new Error(result.message || "A criação não passou pela validação.");
+  } catch (error) {
+    // Mantém o uso offline quando a API Node não estiver disponível.
+    if (error instanceof TypeError) return;
+    throw error;
+  }
+}
+
 export function useODC() {
   const context = useContext(ODCContext);
   if (!context) throw new Error("useODC deve ser usado dentro de ODCProvider.");
@@ -92,6 +109,7 @@ export default function ODCProvider({ children }) {
     }
     setSaving(true);
     try {
+      await validateEntryWithServer(entry);
       await requestPersistentStorage();
       await saveEntry(entry);
       setEntries(current => [...current.filter(item => item.id !== entry.id), entry]);
