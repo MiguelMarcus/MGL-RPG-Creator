@@ -87,13 +87,6 @@ export default function RichTextEditor({ value = "", onChange, placeholder = "Es
     onUpdate({ editor: current }) { onChangeRef.current?.(richTextHTML(current.getHTML())); },
   });
 
-  useEffect(() => {
-    if (!editor) return;
-    const next = richTextHTML(value);
-    const current = editor.isEmpty ? "" : richTextHTML(editor.getHTML());
-    if (next !== current) editor.commands.setContent(next || "<p></p>", { emitUpdate: false });
-  }, [editor, value]);
-
   const addLink = useCallback(() => {
     if (!editor) return;
     const current = editor.getAttributes("link").href || "https://";
