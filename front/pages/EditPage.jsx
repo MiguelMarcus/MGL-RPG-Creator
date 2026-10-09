@@ -23,9 +23,9 @@ export default function EditPage() {
     <div className="page-heading">
       <div><h1>{entry.name || "Nova criação"}</h1><p>Edite cada grupo de informações separadamente e visualize a ficha quando quiser.</p></div>
       <div className="heading-actions">
-        <button className="outline-button" onClick={() => router.push("/visualizar")}>Ver ficha</button>
+        <button className="outline-button" onClick={() => router.push(`/visualizar?id=${encodeURIComponent(entry.id)}`)}>Ver ficha</button>
         <button className="outline-button" onClick={downloadJSON}>Exportar JSON</button>
-        <button className="outline-button" onClick={() => router.push("/visualizar")}>Abrir ficha para PDF</button>
+        <button className="outline-button" onClick={() => router.push(`/visualizar?id=${encodeURIComponent(entry.id)}`)}>Abrir ficha para PDF</button>
       </div>
     </div>
     <section className="editor-panel edit-page-panel">
