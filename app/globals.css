@@ -64,3 +64,12 @@ html,body,.app-shell,.workspace-main{background:var(--bg);color:var(--text);tran
 :root[data-theme="light"] .description-tip{background:var(--gold-50);border-color:var(--gold-200)}
 :root[data-theme="light"] .rich-tool:hover,:root[data-theme="light"] .rich-tool:focus-visible{background:var(--blue-100);color:var(--blue-950)}
 @media(max-width:560px){.rich-content{padding:11px;min-height:calc(var(--rich-editor-min-height) - 10px)}}
+.two-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px 12px}
+.encounter-grid .field{margin-bottom:4px}
+.encounter-tip{margin:0 0 16px;padding:12px 14px;border:1px solid var(--gold-800);border-radius:var(--radius-ui);background:color-mix(in srgb,var(--gold-900) 16%,var(--panel));color:var(--text)}
+.encounter-tip p{margin:0 0 7px;font-size:11px;line-height:1.6}.encounter-tip p strong{color:var(--gold-300)}.encounter-tip small{display:block;color:var(--muted);font-size:10px;line-height:1.6}
+.sheet-extra{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;text-align:center;padding:9px 0;border-bottom:1px solid #987450}
+.sheet-extra small{display:block;margin-bottom:4px;color:#e2bd82;font-size:9px;letter-spacing:.6px}
+.sheet-extra strong{font-size:11px;font-weight:500}
+:root[data-theme="light"] .encounter-tip{background:var(--gold-50);border-color:var(--gold-200)}
+@media(max-width:560px){.two-grid{grid-template-columns:1fr}.sheet-extra{grid-template-columns:repeat(2,minmax(0,1fr))}}
