@@ -24,7 +24,7 @@ const tools = [
   { label: "Subscrito", icon: "x₂", command: "subscript" },
 ];
 
-export default function RichTextEditor({ value = "", onChange, placeholder = "Escreva a descrição...", minHeight = "140px" }) {
+export default function RichTextEditor({ value = "", onChange, placeholder = "", minHeight = "140px" }) {
   const editorRef = useRef(null);
   const valueRef = useRef(value);
 
