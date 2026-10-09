@@ -16,7 +16,6 @@ const textSections = entry => entry.type === "racas"
 const ornaments = [
   { id: "botanical", image: botanicalOrnament },
   { id: "corner", image: cornerOrnament },
-  { id: "frieze", image: friezeOrnament },
 ];
 
 function ornamentForEntry(id) {
@@ -62,14 +61,14 @@ export default function EntryPreview({ entry }) {
           <div className="sheet-extra"><span><small>EXPERIÊNCIA</small><strong>{entry.xp || "—"} XP</strong></span><span><small>MOVIMENTO</small><strong>{entry.movement || "—"} m</strong></span>{movementModes.map(([label, value]) => <span key={label}><small>{label.toUpperCase()}</small><strong>{value} m</strong></span>)}</div></> : <div className="sheet-meta game-data">{gameData.filter(([, value]) => value !== "" && value !== undefined && value !== null).map(([label, value]) => <div key={label}><small>{label}</small><strong>{value}</strong></div>)}</div>}
       </div>
     </header>
-    {ornament.id === "frieze" && <div className="sheet-header-ornament" aria-hidden="true"><img src={ornament.image.src} alt="" /></div>}
+    <div className="sheet-header-ornament" aria-hidden="true"><img src={friezeOrnament.src} alt="" /></div>
     {isMonster && entry.attacks?.length > 0 && <div className="sheet-attacks">{entry.attacks.map((attack, index) => <p key={attack.id || index}><span>◆</span> {attack.count} × <strong>{attack.name} {attack.bonus}</strong> <i>({attack.damage}{attack.extra && ` ${attack.extra}`})</i>{attack.effect && <> · {attack.effect}</>}{attack.weapon && " · Arma"}</p>)}</div>}
     <div className="sheet-body"><div className="sheet-content">
     {entry.type === "classes" && levelRows.length > 0 && <section className="sheet-description"><h2>Progressão de níveis</h2><div className="sheet-progression">{levelRows.map((row, index) => <div key={row.id || index}><strong>{row.level || index + 1}</strong><span>XP {row.xp || "—"}</span><span>PV {row.hp || "—"}</span><span>BA {row.ba || "—"}</span><span>JP {row.jp || "—"}</span></div>)}</div></section>}
     {(entry.type === "racas" || entry.type === "classes") && abilities.filter(ability => ability.name || ability.description).map((ability, index) => <section className="sheet-description" key={ability.id || index}><h2>{ability.name || "Habilidade"}{entry.type === "classes" && ability.level ? ` · Nível ${ability.level}` : ""}</h2>{ability.description && <div className="rich-preview" dangerouslySetInnerHTML={{ __html: richTextHTML(ability.description) }} />}</section>)}
     {entry.type === "classes" && (entry.classSpells || []).filter(spell => spell.name || spell.description).map((spell, index) => <section className="sheet-description" key={spell.id || index}><h2>{spell.name || "Magia"}</h2><p>{[spell.school, spell.spellLevel && `Círculo ${spell.spellLevel}`, spell.range, spell.duration].filter(Boolean).join(" · ")}</p>{spell.description && <div className="rich-preview" dangerouslySetInnerHTML={{ __html: richTextHTML(spell.description) }} />}</section>)}
     {textSections(entry).filter(([, value]) => String(value || "").trim()).map(([title, value]) => <section className="sheet-description rich-preview" style={{ fontFamily: descriptionFont }} key={title}><h2>{title}</h2><div dangerouslySetInnerHTML={{ __html: richTextHTML(value) }} /></section>)}
-    </div>{ornament.id !== "frieze" && <aside className={`sheet-ornament sheet-ornament--${ornament.id}`} aria-hidden="true"><img src={ornament.image.src} alt="" /></aside>}</div>
+    </div><aside className={`sheet-ornament sheet-ornament--${ornament.id}`} aria-hidden="true"><img src={ornament.image.src} alt="" /></aside></div>
     <div className="sheet-foot"><span>ODC <i>✧</i> OFICINA DE CRIAÇÃO</span><span>OLD DRAGON 2ª EDIÇÃO</span></div>
     {imageOpen && createPortal(<div className="image-viewer-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setImageOpen(false); }}><div className="image-viewer-dialog" role="dialog" aria-modal="true" aria-label={`Imagem de ${entry.name || "criação"}`}><button className="image-viewer-close" type="button" aria-label="Fechar imagem" onClick={() => setImageOpen(false)}>×</button><img src={entry.image} alt={entry.name || "Imagem da criação"} /><p>{entry.name || "Imagem da criação"} <span>· Esc para fechar</span></p></div></div>, document.body)}
   </article>;

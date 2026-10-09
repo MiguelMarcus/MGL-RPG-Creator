@@ -3,8 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { blankEntry } from "../../back/odc.mjs";
-import { deleteEntry, loadEntries, requestPersistentStorage, saveEntries, saveEntry } from "../lib/storage";
-import { deleteRemoteEntry, fetchRemoteEntries, saveRemoteEntry } from "../lib/remote-storage";
+import { deleteEntry, loadEntries, requestPersistentStorage, saveEntry } from "../lib/storage";
 import type { CreationEntry, CreationType } from "../types/entry";
 
 type ActiveCategory = CreationType | "todos";
@@ -21,7 +20,6 @@ type ODCContextValue = {
 const ODCContext = createContext<ODCContextValue | null>(null);
 const freshEntry = (type?: CreationType) => blankEntry(type) as CreationEntry;
 const errorMessage = (error: unknown, fallback: string) => error instanceof Error ? error.message : fallback;
-const isOfflineError = (error: unknown) => error instanceof TypeError;
 
 export function useODC() {
   const context = useContext(ODCContext);
@@ -50,24 +48,9 @@ export default function ODCProvider({ children }: { children: ReactNode }) {
       setEntry(requestedEntry); setSelected(requestedEntry.id); setActive(requestedEntry.type); setSaved(true);
     };
 
-    loadEntries().then(async localEntries => {
+    loadEntries().then(localEntries => {
       if (!mounted) return;
       setEntries(localEntries); selectRequestedEntry(localEntries);
-      try {
-        const remoteEntries = await fetchRemoteEntries();
-        const remoteIds = new Set(remoteEntries.map(item => item.id));
-        const uploadedEntries = await Promise.all(localEntries.filter(item => !remoteIds.has(item.id)).map(item => saveRemoteEntry(item).catch(() => item)));
-        const merged = new Map<string, CreationEntry>();
-        [...localEntries, ...remoteEntries, ...uploadedEntries].forEach(item => {
-          const current = merged.get(item.id);
-          if (!current || String(item.updated || "").localeCompare(String(current.updated || "")) >= 0) merged.set(item.id, item);
-        });
-        const synchronizedEntries = [...merged.values()];
-        await saveEntries(synchronizedEntries);
-        if (mounted) { setEntries(synchronizedEntries); selectRequestedEntry(synchronizedEntries); }
-      } catch (error) {
-        if (mounted && !isOfflineError(error)) setToast(errorMessage(error, "Não foi possível sincronizar a biblioteca."));
-      }
     }).catch(error => { if (mounted) setToast(errorMessage(error, "Não foi possível abrir a biblioteca deste navegador.")); });
     return () => { mounted = false; };
   }, []);
@@ -107,16 +90,7 @@ export default function ODCProvider({ children }: { children: ReactNode }) {
       await saveEntry(localEntry);
       setEntries(current => [...current.filter(item => item.id !== localEntry.id), localEntry]);
       setEntry(localEntry); setSelected(localEntry.id); setSaved(true);
-      try {
-        const synchronizedEntry = await saveRemoteEntry(localEntry);
-        await saveEntry(synchronizedEntry);
-        setEntries(current => [...current.filter(item => item.id !== synchronizedEntry.id), synchronizedEntry]);
-        setEntry(synchronizedEntry);
-        notify("Criação salva e sincronizada");
-      } catch (error) {
-        if (!isOfflineError(error)) throw error;
-        notify("Criação salva neste navegador; sincronização pendente.");
-      }
+      notify("Criação salva neste navegador.");
       router.push(`/visualizar?id=${encodeURIComponent(localEntry.id)}`);
     } catch (error) {
       const quota = error instanceof DOMException && error.name === "QuotaExceededError";
@@ -133,8 +107,7 @@ export default function ODCProvider({ children }: { children: ReactNode }) {
   const remove = useCallback(async (item: CreationEntry) => {
     await deleteEntry(item.id);
     setEntries(current => current.filter(entryItem => entryItem.id !== item.id));
-    try { await deleteRemoteEntry(item.id); notify("Criação excluída."); }
-    catch (error) { notify(isOfflineError(error) ? "Criação removida deste navegador; exclusão no servidor está pendente." : errorMessage(error, "Criação removida localmente, mas não foi possível sincronizar a exclusão.")); }
+    notify("Criação excluída.");
     if (selected === item.id) { const fresh = freshEntry(item.type); setEntry(fresh); setSelected(""); setSaved(false); }
   }, [notify, selected]);
 

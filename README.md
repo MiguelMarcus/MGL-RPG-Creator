@@ -2,7 +2,7 @@
 
 Aplicação modular para criar conteúdo de Old Dragon 2, visualizar fichas e exportar dados.
 
-> A versão com API requer hospedagem Node.js; GitHub Pages não executa rotas de servidor.
+> Esta versão é estática e publicada no GitHub Pages. O armazenamento é local ao navegador.
 
 ## Execução
 
@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-A aplicação utiliza Next.js com runtime Node.js. As rotas `/api/entries` oferecem criação, leitura, atualização e exclusão no servidor. O IndexedDB continua como cache e modo offline; quando a API estiver disponível, as criações locais são sincronizadas.
+A aplicação usa Next.js para gerar o site estático e IndexedDB para salvar as criações no navegador. Um CRUD Node pode ser adicionado quando o projeto migrar para uma hospedagem com servidor.
 
 ## Recursos
 
