@@ -1,0 +1,28 @@
+/* Movimento discreto: dá resposta aos gestos sem competir com o conteúdo. */
+@keyframes page-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes card-enter{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes soft-pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--blue-400) 0%,transparent)}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--blue-400) 14%,transparent)}}
+
+.page-content,.all-library-page,.creation-type-page{animation:page-enter .32s cubic-bezier(.2,.75,.25,1) both}
+.creation-card{animation:card-enter .36s cubic-bezier(.2,.75,.25,1) both;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease,background-color .2s ease}
+.creation-card:nth-child(2){animation-delay:.035s}.creation-card:nth-child(3){animation-delay:.07s}.creation-card:nth-child(4){animation-delay:.105s}.creation-card:nth-child(5){animation-delay:.14s}.creation-card:nth-child(6){animation-delay:.175s}
+.creation-card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--blue-400) 55%,var(--line));box-shadow:0 12px 26px rgb(0 0 0 / 16%)}
+.creation-card:hover .creation-art img{transform:scale(1.045)}
+.creation-art img{transition:transform .35s cubic-bezier(.2,.75,.25,1)}
+
+.nav-item{position:relative;transition:color .16s ease,background-color .16s ease,transform .16s ease}
+.nav-item::before{content:"";position:absolute;left:0;width:2px;height:0;border-radius:0 2px 2px 0;background:var(--action-gold);transition:height .2s ease}
+.nav-item:hover{background:var(--panel2);color:var(--text);transform:translateX(2px)}
+.nav-item.selected::before{height:58%}
+.nav-item.selected{animation:soft-pulse .42s ease-out}
+
+.new-button,.save-button,.outline-button,.export-button,.add-small,.theme-toggle,.creation-card-actions button{transition:transform .16s ease,box-shadow .16s ease,background-color .16s ease,border-color .16s ease,color .16s ease}
+.new-button:hover,.save-button:hover,.export-button:hover{transform:translateY(-2px);box-shadow:0 7px 16px color-mix(in srgb,var(--blue-600) 26%,transparent)}
+.outline-button:hover,.add-small:hover,.theme-toggle:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgb(0 0 0 / 12%)}
+.new-button:active,.save-button:active,.outline-button:active,.export-button:active,.add-small:active,.theme-toggle:active,.nav-item:active{transform:translateY(1px) scale(.98)}
+.editor-panel,.library-panel,.sheet-card,.creation-empty{transition:border-color .2s ease,box-shadow .2s ease}
+.editor-panel:focus-within{border-color:color-mix(in srgb,var(--blue-400) 58%,var(--line));box-shadow:0 10px 28px rgb(0 0 0 / 10%)}
+.field input,.field select,.field textarea,.search-box{transition:border-color .16s ease,box-shadow .16s ease,background-color .16s ease}
+.field input:focus,.field select:focus,.field textarea:focus,.search-box:focus-within{border-color:var(--blue-400);box-shadow:0 0 0 3px color-mix(in srgb,var(--blue-400) 15%,transparent)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
