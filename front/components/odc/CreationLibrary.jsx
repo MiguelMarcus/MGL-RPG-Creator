@@ -1,4 +1,4 @@
-import { categories } from "../../lib/odc.mjs";
+import { categories } from "../../../back/odc.mjs";
 
 export default function CreationLibrary({ entries, active = "todos", query, onQueryChange, onCreate, onView, onEdit }) {
   const category = categories.find(item => item.id === active);

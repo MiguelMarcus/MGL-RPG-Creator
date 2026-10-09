@@ -1,2 +1,5 @@
-import ODCWorkspace from "../components/odc/ODCWorkspace";
-export default function Page() { return <ODCWorkspace />; }
+import LibraryPage from "../front/pages/LibraryPage";
+
+export default function Page() {
+  return <LibraryPage />;
+}

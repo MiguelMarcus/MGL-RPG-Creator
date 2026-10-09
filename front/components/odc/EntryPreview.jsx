@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { categories, descriptionFontFamily, richTextHTML } from "../../lib/odc.mjs";
+import { categories, descriptionFontFamily, richTextHTML } from "../../../back/odc.mjs";
 
 const textSections = entry => entry.type === "racas"
   ? [["Descrição", entry.description], ["Personalidade", entry.combat], ["Aventuras", entry.finalDescription]]

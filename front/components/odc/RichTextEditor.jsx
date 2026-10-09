@@ -6,7 +6,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Superscript from "@tiptap/extension-superscript";
 import Subscript from "@tiptap/extension-subscript";
-import { descriptionFonts, richTextHTML } from "../../lib/odc.mjs";
+import { descriptionFonts, richTextHTML } from "../../../back/odc.mjs";
 
 function ToolButton({ label, active = false, children, onClick }) {
   return <button type="button" className={`rich-tool${active ? " is-active" : ""}`} title={label} aria-label={label} aria-pressed={active} onMouseDown={event => event.preventDefault()} onClick={onClick}>{children}</button>;
@@ -77,6 +77,7 @@ export default function RichTextEditor({ value = "", onChange, font = "georgia",
     Superscript,
     Subscript,
   ], [placeholder]);
+
   const editor = useEditor({
     extensions,
     content: richTextHTML(value) || "<p></p>",
@@ -94,6 +95,15 @@ export default function RichTextEditor({ value = "", onChange, font = "georgia",
     },
     onUpdate({ editor: current }) { onChangeRef.current?.(richTextHTML(current.getHTML())); },
   });
+
+  useEffect(() => {
+    if (!editor) return;
+    const nextContent = richTextHTML(value) || "<p></p>";
+    const currentContent = editor.getHTML();
+    if (nextContent !== currentContent) {
+      editor.commands.setContent(nextContent, { emitUpdate: false });
+    }
+  }, [editor, value]);
 
   const addLink = useCallback(() => {
     if (!editor) return;

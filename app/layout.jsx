@@ -1,4 +1,6 @@
-import "./globals.css";
+import "../front/styles/globals.css";
+import ODCProvider from "../front/state/ODCProvider";
+import WorkspaceShell from "../front/components/layout/WorkspaceShell";
 
 export const metadata = {
   title: "ODC — Oficina de Criação",
@@ -6,5 +8,5 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  return <html lang="pt-BR"><body>{children}</body></html>;
+  return <html lang="pt-BR"><body><ODCProvider><WorkspaceShell>{children}</WorkspaceShell></ODCProvider></body></html>;
 }

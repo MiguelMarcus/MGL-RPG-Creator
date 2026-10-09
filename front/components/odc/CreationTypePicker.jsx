@@ -1,4 +1,4 @@
-import { categories } from "../../lib/odc.mjs";
+import { categories } from "../../../back/odc.mjs";
 
 const descriptions = {
   monstros: "Criaturas, encontros, ataques e tesouros.",
