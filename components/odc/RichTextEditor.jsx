@@ -26,19 +26,37 @@ const tools = [
 
 export default function RichTextEditor({ value = "", onChange, placeholder = "", minHeight = "140px" }) {
   const editorRef = useRef(null);
-  const valueRef = useRef(value);
+  const selectionRef = useRef(null);
 
   useEffect(() => {
-    valueRef.current = value;
     const editor = editorRef.current;
-    if (editor && document.activeElement !== editor && editor.innerHTML !== richTextHTML(value)) {
-      editor.innerHTML = richTextHTML(value);
-    }
+    const next = richTextHTML(value);
+    if (editor && document.activeElement !== editor && editor.innerHTML !== next) editor.innerHTML = next;
   }, [value]);
 
-  const run = (tool) => {
+  const rememberSelection = () => {
     const editor = editorRef.current;
-    editor?.focus();
+    const selection = window.getSelection();
+    if (!editor || !selection?.rangeCount || !editor.contains(selection.anchorNode)) return;
+    selectionRef.current = selection.getRangeAt(0).cloneRange();
+  };
+
+  const publishEditorValue = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    onChange(richTextHTML(editor.innerHTML));
+    rememberSelection();
+  };
+
+  const run = tool => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
+    const selection = window.getSelection();
+    if (selectionRef.current && editor.contains(selectionRef.current.startContainer)) {
+      selection.removeAllRanges();
+      selection.addRange(selectionRef.current);
+    }
     if (tool.command === "createLink") {
       const url = window.prompt("Endereço do link:");
       if (!url) return;
@@ -46,9 +64,7 @@ export default function RichTextEditor({ value = "", onChange, placeholder = "",
     } else {
       document.execCommand(tool.command, false, tool.value || null);
     }
-    const next = richTextHTML(editor.innerHTML);
-    valueRef.current = next;
-    onChange(next);
+    publishEditorValue();
   };
 
   return <div className="rich-editor" style={{ "--rich-editor-min-height": minHeight }}>
@@ -57,8 +73,11 @@ export default function RichTextEditor({ value = "", onChange, placeholder = "",
         ? <span className="rich-separator" aria-hidden="true" key={`separator-${index}`} />
         : <button type="button" key={tool.label} title={tool.label} aria-label={tool.label} className={`rich-tool ${tool.className || ""}`} onMouseDown={event => event.preventDefault()} onClick={() => run(tool)}>{tool.icon}</button>)}
     </div>
-    <div ref={editorRef} className="rich-content" contentEditable suppressContentEditableWarning role="textbox" aria-multiline="true" data-placeholder={placeholder}
-      onInput={event => { const next = richTextHTML(event.currentTarget.innerHTML); valueRef.current = next; onChange(next); }}
-      onPaste={event => { event.preventDefault(); const text = event.clipboardData.getData("text/plain"); document.execCommand("insertText", false, text); }} />
+    <div ref={editorRef} className="rich-content" contentEditable suppressContentEditableWarning role="textbox" aria-label="Descrição" aria-multiline="true" data-placeholder={placeholder}
+      onKeyUp={rememberSelection}
+      onMouseUp={rememberSelection}
+      onInput={publishEditorValue}
+      onBlur={publishEditorValue}
+      onPaste={event => { event.preventDefault(); const text = event.clipboardData.getData("text/plain"); document.execCommand("insertText", false, text); publishEditorValue(); }} />
   </div>;
 }
