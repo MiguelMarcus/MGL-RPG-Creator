@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Field from "./Field";
+import TokenCropEditor from "./TokenCropEditor";
+import { renderTokenPNG } from "../../lib/token-image.mjs";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
@@ -20,39 +22,6 @@ function readImage(file) {
   });
 }
 
-function makeToken(source, color) {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => {
-      const size = 512;
-      const canvas = document.createElement("canvas");
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return reject(new Error("Seu navegador não conseguiu criar o token."));
-      const inset = 23;
-      const radius = (size - inset * 2) / 2;
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(size / 2, size / 2, radius, 0, Math.PI * 2);
-      ctx.clip();
-      const scale = Math.max((radius * 2) / image.width, (radius * 2) / image.height);
-      const width = image.width * scale;
-      const height = image.height * scale;
-      ctx.drawImage(image, (size - width) / 2, (size - height) / 2, width, height);
-      ctx.restore();
-      ctx.beginPath();
-      ctx.arc(size / 2, size / 2, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = /^#[\da-f]{6}$/i.test(color || "") ? color : "#133DD8";
-      ctx.lineWidth = inset;
-      ctx.stroke();
-      resolve(canvas.toDataURL("image/png"));
-    };
-    image.onerror = () => reject(new Error("Não foi possível abrir a imagem escolhida."));
-    image.src = source;
-  });
-}
-
 function saveImage(data, fileName) {
   const link = document.createElement("a");
   link.href = data;
@@ -66,13 +35,14 @@ function slug(value) {
 
 export default function ImageAssetsEditor({ entry, onChange, isMonster = false }) {
   const [error, setError] = useState("");
+  const [cropOpen, setCropOpen] = useState(false);
   const update = (key, value) => onChange({ ...entry, [key]: value });
   const variants = entry.imageVariants || [];
   const tokenVariants = entry.tokenVariants || [];
   const sources = [{ id: "main", label: entry.name || "Imagem principal", image: entry.image }, ...variants.map((variant, index) => ({ id: variant.id, label: variant.name || `Variante ${index + 1}`, image: variant.image }))];
 
   const uploadPrimary = async file => {
-    try { setError(""); onChange({ ...entry, image: await readImage(file), tokenImage: "", tokenVariants: tokenVariants.map(variant => variant.source === "main" ? { ...variant, image: "" } : variant) }); }
+    try { setError(""); onChange({ ...entry, image: await readImage(file), tokenImage: "", tokenCrop: { zoom: 1, x: 0, y: 0 }, tokenVariants: tokenVariants.map(variant => variant.source === "main" ? { ...variant, image: "" } : variant) }); }
     catch (error) { setError(error.message); }
   };
 
@@ -97,10 +67,10 @@ export default function ImageAssetsEditor({ entry, onChange, isMonster = false }
   const generateTokens = async () => {
     try {
       setError("");
-      const mainToken = entry.image ? await makeToken(entry.image, entry.tokenFrameColor) : "";
+      const mainToken = entry.image ? await renderTokenPNG(entry.image, entry.tokenFrameColor, entry.tokenCrop) : "";
       const generatedVariants = await Promise.all(tokenVariants.map(async variant => {
         const source = sources.find(item => item.id === variant.source)?.image;
-        return { ...variant, image: source ? await makeToken(source, variant.frameColor || entry.tokenFrameColor) : "" };
+        return { ...variant, image: source ? await renderTokenPNG(source, variant.frameColor || entry.tokenFrameColor) : "" };
       }));
       onChange({ ...entry, tokenImage: mainToken, tokenVariants: generatedVariants });
     } catch (error) { setError(error.message); }
@@ -109,8 +79,16 @@ export default function ImageAssetsEditor({ entry, onChange, isMonster = false }
   const generateVariant = async variant => {
     const source = sources.find(item => item.id === variant.source)?.image;
     if (!source) { setError("Adicione uma imagem de origem antes de gerar este token."); return; }
-    try { setError(""); updateTokenVariant(variant.id, "image", await makeToken(source, variant.frameColor || entry.tokenFrameColor)); }
+    try { setError(""); updateTokenVariant(variant.id, "image", await renderTokenPNG(source, variant.frameColor || entry.tokenFrameColor)); }
     catch (error) { setError(error.message); }
+  };
+  const applyMainCrop = async crop => {
+    try {
+      setError("");
+      const image = await renderTokenPNG(entry.image, entry.tokenFrameColor, crop);
+      onChange({ ...entry, tokenImage: image, tokenCrop: crop });
+      setCropOpen(false);
+    } catch (error) { setError(error.message); }
   };
   const canGenerate = Boolean(entry.image || tokenVariants.some(variant => sources.find(source => source.id === variant.source)?.image));
 
@@ -120,7 +98,7 @@ export default function ImageAssetsEditor({ entry, onChange, isMonster = false }
       <div className="image-upload">
         {entry.image ? <img src={entry.image} alt="Prévia da imagem principal" /> : <span className="image-placeholder">＋</span>}
         <div><strong>{entry.image ? "Imagem principal" : "Nenhuma imagem selecionada"}</strong><small>Essa imagem aparece na ficha.</small><label className="upload-button">{entry.image ? "Trocar imagem" : "Escolher imagem"}<input type="file" accept="image/png,image/jpeg,image/webp" onChange={event => { const file = event.target.files?.[0]; if (file) uploadPrimary(file); event.target.value = ""; }} /></label></div>
-        {entry.image && <button type="button" className="text-action" onClick={() => onChange({ ...entry, image: "", tokenImage: "", tokenVariants: tokenVariants.map(variant => variant.source === "main" ? { ...variant, image: "" } : variant) })}>Remover</button>}
+        {entry.image && <button type="button" className="text-action" onClick={() => onChange({ ...entry, image: "", tokenImage: "", tokenCrop: { zoom: 1, x: 0, y: 0 }, tokenVariants: tokenVariants.map(variant => variant.source === "main" ? { ...variant, image: "" } : variant) })}>Remover</button>}
       </div>
     </Field>
 
@@ -144,8 +122,9 @@ export default function ImageAssetsEditor({ entry, onChange, isMonster = false }
           <div className="token-variant-fields"><Field label="Nome"><input value={variant.name || ""} onChange={event => updateTokenVariant(variant.id, "name", event.target.value)} placeholder={`Token ${index + 1}`} /></Field><Field label="Imagem de origem"><select value={variant.source || "main"} onChange={event => updateTokenVariant(variant.id, "source", event.target.value)}>{sources.map(source => <option key={source.id} value={source.id}>{source.label}</option>)}</select></Field><label className="color-field"><span>Moldura</span><input type="color" value={variant.frameColor || entry.tokenFrameColor || "#133DD8"} onChange={event => updateTokenVariant(variant.id, "frameColor", event.target.value)} /></label></div>
           <div className="token-variant-actions"><button type="button" className="outline-button" onClick={() => generateVariant(variant)}>Gerar</button>{variant.image && <button type="button" className="text-action" onClick={() => saveImage(variant.image, `${slug(variant.name)}.png`)}>Baixar PNG</button>}<button type="button" className="asset-remove" onClick={() => removeTokenVariant(variant.id)}>Remover</button></div>
         </div>)}
-        {entry.tokenImage && <div className="main-token-result"><img src={entry.tokenImage} alt="Token principal gerado" /><span>Token principal</span><button type="button" className="text-action" onClick={() => saveImage(entry.tokenImage, `${slug(entry.name)}-token.png`)}>Baixar PNG</button></div>}
+        {entry.image && <div className="main-token-result"><button type="button" className={`main-token-preview ${entry.tokenImage ? "generated" : ""}`} style={{ "--token-frame": entry.tokenFrameColor || "#133DD8" }} onClick={() => setCropOpen(true)} title="Clique para ajustar recorte e zoom">{entry.tokenImage ? <img src={entry.tokenImage} alt="Token principal" /> : <img src={entry.image} alt="Prévia do token principal" />}</button><div><strong>Token principal</strong><small>Clique no token para ajustar o recorte e o zoom.</small>{entry.tokenImage && <button type="button" className="text-action" onClick={() => saveImage(entry.tokenImage, `${slug(entry.name)}-token.png`)}>Baixar PNG</button>}</div></div>}
       </>}
     </div>}
+    {cropOpen && <TokenCropEditor source={entry.image} color={entry.tokenFrameColor || "#133DD8"} initialCrop={entry.tokenCrop} onClose={() => setCropOpen(false)} onApply={applyMainCrop} />}
   </div>;
 }
