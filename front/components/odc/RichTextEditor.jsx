@@ -14,8 +14,7 @@ function ToolButton({ label, active = false, children, onClick }) {
 
 function applyToCursorBlock(editor, action) {
   if (!editor) return;
-  const cursor = editor.state.selection.head;
-  action(editor.chain().focus().setTextSelection(cursor)).run();
+  action(editor.chain().focus()).run();
 }
 
 function RichToolbar({ editor, onLink, font, onFontChange }) {
@@ -23,6 +22,8 @@ function RichToolbar({ editor, onLink, font, onFontChange }) {
     editor,
     selector: ({ editor: current }) => ({
       paragraph: current?.isActive("paragraph") || false,
+      heading2: current?.isActive("heading", { level: 2 }) || false,
+      heading3: current?.isActive("heading", { level: 3 }) || false,
       bulletList: current?.isActive("bulletList") || false,
       orderedList: current?.isActive("orderedList") || false,
       quote: current?.isActive("blockquote") || false,
@@ -40,8 +41,8 @@ function RichToolbar({ editor, onLink, font, onFontChange }) {
   return <div className="rich-toolbar" role="toolbar" aria-label="Formatação da descrição">
     <div className="rich-tool-group" aria-label="Blocos">
       <ToolButton label="Texto normal no parágrafo atual" active={state.paragraph} onClick={() => applyToCursorBlock(editor, chain => chain.setParagraph())}>¶</ToolButton>
-      <ToolButton label="Título no parágrafo atual" onClick={() => applyToCursorBlock(editor, chain => chain.setHeading({ level: 2 }))}>H₂</ToolButton>
-      <ToolButton label="Subtítulo no parágrafo atual" onClick={() => applyToCursorBlock(editor, chain => chain.setHeading({ level: 3 }))}>H₃</ToolButton>
+      <ToolButton label="Título no parágrafo atual" active={state.heading2} onClick={() => applyToCursorBlock(editor, chain => chain.setHeading({ level: 2 }))}>H₂</ToolButton>
+      <ToolButton label="Subtítulo no parágrafo atual" active={state.heading3} onClick={() => applyToCursorBlock(editor, chain => chain.setHeading({ level: 3 }))}>H₃</ToolButton>
       <ToolButton label="Lista a partir do parágrafo atual" active={state.bulletList} onClick={() => applyToCursorBlock(editor, chain => chain.toggleBulletList())}>☷</ToolButton>
       <ToolButton label="Lista numerada a partir do parágrafo atual" active={state.orderedList} onClick={() => applyToCursorBlock(editor, chain => chain.toggleOrderedList())}>1.</ToolButton>
       <ToolButton label="Citação do parágrafo atual" active={state.quote} onClick={() => applyToCursorBlock(editor, chain => chain.toggleBlockquote())}>❝</ToolButton>
@@ -70,6 +71,7 @@ function RichToolbar({ editor, onLink, font, onFontChange }) {
 
 export default function RichTextEditor({ value = "", onChange, font = "georgia", fontFamily = "Georgia, serif", onFontChange, placeholder = "Escreva sua descrição…", minHeight = "220px" }) {
   const onChangeRef = useRef(onChange);
+  const lastContentRef = useRef(richTextHTML(value) || "<p></p>");
   useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
   const extensions = useMemo(() => [
     StarterKit.configure({ heading: { levels: [2, 3] } }),
@@ -93,15 +95,19 @@ export default function RichTextEditor({ value = "", onChange, font = "georgia",
       },
       transformPastedText(text) { return text; },
     },
-    onUpdate({ editor: current }) { onChangeRef.current?.(richTextHTML(current.getHTML())); },
+    onUpdate({ editor: current }) {
+      const nextContent = richTextHTML(current.getHTML()) || "<p></p>";
+      lastContentRef.current = nextContent;
+      onChangeRef.current?.(nextContent);
+    },
   });
 
   useEffect(() => {
     if (!editor) return;
     const nextContent = richTextHTML(value) || "<p></p>";
-    const currentContent = editor.getHTML();
-    if (nextContent !== currentContent) {
+    if (nextContent !== lastContentRef.current) {
       editor.commands.setContent(nextContent, { emitUpdate: false });
+      lastContentRef.current = nextContent;
     }
   }, [editor, value]);
 
