@@ -137,7 +137,7 @@ export default function EntryEditor({ entry, onChange }) {
 
     <section className="editor-section last-section"><div className="section-heading"><div><span className="eyebrow">{isMonster ? "06" : isRace || isClass || isGear || isSpell ? "03" : "02"} / NARRATIVA</span><h2>{isRace ? "Descrição da raça" : isClass ? "Apresentação e restrições" : "Descrição"}</h2><p>Organize o conteúdo em partes para facilitar a leitura.</p></div><span className="section-symbol">❧</span></div>
       {!isRace && !isClass && <div className="description-tip"><span aria-hidden="true">ⓘ</span><p><strong>Dica:</strong> use a barra para formatar títulos, listas, citações, links, negrito e itálico.</p></div>}
-      {descriptionSections.map(([label, help, key]) => <Field key={key} label={label} help={help}><RichTextEditor key={`${entry.id}:${key}`} value={entry[key] || ""} onChange={value => update(key, value)} minHeight="150px" /></Field>)}
+      {descriptionSections.map(([label, help, key]) => <Field key={key} label={label} help={help}><RichTextEditor key={`${entry.id}:${key}`} value={entry[key] || ""} onChange={value => update(key, value)} minHeight="220px" /></Field>)}
     </section>
   </div>;
 }

@@ -8,16 +8,14 @@ import Superscript from "@tiptap/extension-superscript";
 import Subscript from "@tiptap/extension-subscript";
 import { richTextHTML } from "../../lib/odc.mjs";
 
-function ToolButton({ label, active = false, disabled = false, children, onClick }) {
-  return <button type="button" className={`rich-tool${active ? " is-active" : ""}`} title={label} aria-label={label} aria-pressed={active} disabled={disabled} onMouseDown={event => event.preventDefault()} onClick={onClick}>{children}</button>;
+function ToolButton({ label, active = false, children, onClick }) {
+  return <button type="button" className={`rich-tool${active ? " is-active" : ""}`} title={label} aria-label={label} aria-pressed={active} onMouseDown={event => event.preventDefault()} onClick={onClick}>{children}</button>;
 }
 
 function RichToolbar({ editor, onLink }) {
   const state = useEditorState({
     editor,
     selector: ({ editor: current }) => ({
-      canUndo: current?.can().undo() || false,
-      canRedo: current?.can().redo() || false,
       heading2: current?.isActive("heading", { level: 2 }) || false,
       heading3: current?.isActive("heading", { level: 3 }) || false,
       bulletList: current?.isActive("bulletList") || false,
@@ -35,11 +33,6 @@ function RichToolbar({ editor, onLink }) {
     }),
   });
   return <div className="rich-toolbar" role="toolbar" aria-label="Formatação da descrição">
-    <div className="rich-tool-group" aria-label="Histórico">
-      <ToolButton label="Desfazer" disabled={!state.canUndo} onClick={() => editor?.chain().focus().undo().run()}>↶</ToolButton>
-      <ToolButton label="Refazer" disabled={!state.canRedo} onClick={() => editor?.chain().focus().redo().run()}>↷</ToolButton>
-    </div>
-    <span className="rich-separator" aria-hidden="true" />
     <div className="rich-tool-group" aria-label="Blocos">
       <ToolButton label="Título" active={state.heading2} onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}>H₂</ToolButton>
       <ToolButton label="Subtítulo" active={state.heading3} onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}>H₃</ToolButton>
@@ -63,7 +56,7 @@ function RichToolbar({ editor, onLink }) {
   </div>;
 }
 
-export default function RichTextEditor({ value = "", onChange, placeholder = "Escreva sua descrição…", minHeight = "140px" }) {
+export default function RichTextEditor({ value = "", onChange, placeholder = "Escreva sua descrição…", minHeight = "220px" }) {
   const onChangeRef = useRef(onChange);
   useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
   const extensions = useMemo(() => [
