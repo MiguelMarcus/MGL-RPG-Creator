@@ -27,6 +27,16 @@ function readAll(database) {
   });
 }
 
+function readOne(database, id) {
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction(ENTRY_STORE, "readonly");
+    const request = transaction.objectStore(ENTRY_STORE).get(id);
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(request.error || new Error("Não foi possível ler a criação."));
+    transaction.onabort = () => reject(transaction.error || new Error("A leitura da criação foi interrompida."));
+  });
+}
+
 function writeEntries(database, entries, mode = "readwrite") {
   return new Promise((resolve, reject) => {
     const transaction = database.transaction(ENTRY_STORE, mode);
@@ -60,6 +70,16 @@ export async function loadEntries() {
     await writeEntries(database, legacy);
     try { localStorage.removeItem(LEGACY_KEY); } catch {}
     return legacy;
+  } finally {
+    database.close();
+  }
+}
+
+export async function loadEntry(id) {
+  if (!id) return null;
+  const database = await openDatabase();
+  try {
+    return await readOne(database, id);
   } finally {
     database.close();
   }
