@@ -2,6 +2,8 @@
 
 Aplicação modular para criar conteúdo de Old Dragon 2, visualizar fichas e exportar dados.
 
+Página: https://miguelmarcus.github.io/MGL-RPG-Creator/
+
 ## Recursos
 
 - Editor organizado para monstros, raças, classes, equipamentos e magias.
